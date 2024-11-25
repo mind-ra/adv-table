@@ -3,34 +3,46 @@ import * as $ from './utils/dom';
 import throttled from './utils/throttled';
 
 import {
-  IconDirectionLeftDown,
-  IconDirectionRightDown,
-  IconDirectionUpRight,
-  IconDirectionDownRight,
-  IconCross,
-  IconPlus
+	IconDirectionLeftDown,
+	IconDirectionRightDown,
+	IconDirectionUpRight,
+	IconDirectionDownRight,
+	IconCross,
+	IconPlus,
+	IconChevronUp,
+	IconChevronRight,
+	IconChevronDown,
+	IconChevronLeft,
 } from '@codexteam/icons';
 
 const CSS = {
-  wrapper: 'tc-wrap',
-  wrapperReadOnly: 'tc-wrap--readonly',
-  table: 'tc-table',
-  row: 'tc-row',
-  withHeadings: 'tc-table--heading',
-  rowSelected: 'tc-row--selected',
-  cell: 'tc-cell',
-  cellSelected: 'tc-cell--selected',
-  addRow: 'tc-add-row',
-  addRowDisabled: 'tc-add-row--disabled',
-  addColumn: 'tc-add-column',
-  addColumnDisabled: 'tc-add-column--disabled',
+	wrapper: 'tc-wrap',
+	wrapperReadOnly: 'tc-wrap--readonly',
+	table: 'tc-table',
+	row: 'tc-row',
+	withHeadings: 'tc-table--heading',
+	rowSelected: 'tc-row--selected',
+	cell: 'tc-cell',
+	cellSelected: 'tc-cell--selected',
+	addRow: 'tc-add-row',
+	addRowDisabled: 'tc-add-row--disabled',
+	addColumn: 'tc-add-column',
+	addColumnDisabled: 'tc-add-column--disabled',
 };
 
 /**
  * @typedef {object} TableConfig
  * @description Tool's config from Editor
  * @property {boolean} withHeadings — Uses the first line as headings
- * @property {string[][]} withHeadings — two-dimensional array with table contents
+ * @property {TableCell[][]} content — two-dimensional array with table contents
+ */
+
+/**
+ * @typedef {object} TableCell
+ * @description Data per table cell
+ * @property {string} content - string content for table
+ * @property {number} colspan - width of the cell
+ * @property {number} rowspan - height of the cell
  */
 
 /**
@@ -39,973 +51,830 @@ const CSS = {
  * @property {number} cols - number of columns in the table
  */
 
-
 /**
  * Generates and manages table contents.
  */
 export default class Table {
-  /**
-   * Creates
-   *
-   * @constructor
-   * @param {boolean} readOnly - read-only mode flag
-   * @param {object} api - Editor.js API
-   * @param {TableData} data - Editor.js API
-   * @param {TableConfig} config - Editor.js API
-   */
-  constructor(readOnly, api, data, config) {
-    this.readOnly = readOnly;
-    this.api = api;
-    this.data = data;
-    this.config = config;
-
-    /**
-     * DOM nodes
-     */
-    this.wrapper = null;
-    this.table = null;
-
-    /**
-     * Toolbox for managing of columns
-     */
-    this.toolboxColumn = this.createColumnToolbox();
-    this.toolboxRow = this.createRowToolbox();
-
-    /**
-     * Create table and wrapper elements
-     */
-    this.createTableWrapper();
-
-    // Current hovered row index
-    this.hoveredRow = 0;
-
-    // Current hovered column index
-    this.hoveredColumn = 0;
-
-    // Index of last selected row via toolbox
-    this.selectedRow = 0;
-
-    // Index of last selected column via toolbox
-    this.selectedColumn = 0;
-
-    // Additional settings for the table
-    this.tunes = {
-      withHeadings: false
-    };
-
-    /**
-     * Resize table to match config/data size
-     */
-    this.resize();
-
-    /**
-     * Fill the table with data
-     */
-    this.fill();
-
-    /**
-     * The cell in which the focus is currently located, if 0 and 0 then there is no focus
-     * Uses to switch between cells with buttons
-     */
-    this.focusedCell = {
-      row: 0,
-      column: 0
-    };
-
-    /**
-     * Global click listener allows to delegate clicks on some elements
-     */
-    this.documentClicked = (event) => {
-      const clickedInsideTable = event.target.closest(`.${CSS.table}`) !== null;
-      const outsideTableClicked = event.target.closest(`.${CSS.wrapper}`) === null;
-      const clickedOutsideToolboxes = clickedInsideTable || outsideTableClicked;
-
-      if (clickedOutsideToolboxes) {
-        this.hideToolboxes();
-      }
-
-      const clickedOnAddRowButton = event.target.closest(`.${CSS.addRow}`);
-      const clickedOnAddColumnButton = event.target.closest(`.${CSS.addColumn}`);
-
-      /**
-       * Also, check if clicked in current table, not other (because documentClicked bound to the whole document)
-       */
-      if (clickedOnAddRowButton && clickedOnAddRowButton.parentNode === this.wrapper) {
-        this.addRow(undefined, true);
-        this.hideToolboxes();
-      } else if (clickedOnAddColumnButton && clickedOnAddColumnButton.parentNode === this.wrapper) {
-        this.addColumn(undefined, true);
-        this.hideToolboxes();
-      }
-    };
-
-    if (!this.readOnly) {
-      this.bindEvents();
-    }
-  }
-
-  /**
-   * Returns the rendered table wrapper
-   *
-   * @returns {Element}
-   */
-  getWrapper() {
-    return this.wrapper;
-  }
-
-  /**
-   * Hangs the necessary handlers to events
-   */
-  bindEvents() {
-    // set the listener to close toolboxes when click outside
-    document.addEventListener('click', this.documentClicked);
-
-    // Update toolboxes position depending on the mouse movements
-    this.table.addEventListener('mousemove', throttled(150, (event) => this.onMouseMoveInTable(event)), { passive: true });
-
-    // Controls some of the keyboard buttons inside the table
-    this.table.onkeypress = (event) => this.onKeyPressListener(event);
-
-    // Tab is executed by default before keypress, so it must be intercepted on keydown
-    this.table.addEventListener('keydown', (event) => this.onKeyDownListener(event));
-
-    // Determine the position of the cell in focus
-    this.table.addEventListener('focusin', event => this.focusInTableListener(event));
-  }
-
-  /**
-   * Configures and creates the toolbox for manipulating with columns
-   *
-   * @returns {Toolbox}
-   */
-  createColumnToolbox() {
-    return new Toolbox({
-      api: this.api,
-      cssModifier: 'column',
-      items: [
-        {
-          label: this.api.i18n.t('Add column to left'),
-          icon: IconDirectionLeftDown,
-          hideIf: () => {
-            return this.numberOfColumns === this.config.maxcols
-          },
-          onClick: () => {
-            this.addColumn(this.selectedColumn, true);
-            this.hideToolboxes();
-          }
-        },
-        {
-          label: this.api.i18n.t('Add column to right'),
-          icon: IconDirectionRightDown,
-          hideIf: () => {
-            return this.numberOfColumns === this.config.maxcols
-          },
-          onClick: () => {
-            this.addColumn(this.selectedColumn + 1, true);
-            this.hideToolboxes();
-          }
-        },
-        {
-          label: this.api.i18n.t('Delete column'),
-          icon: IconCross,
-          hideIf: () => {
-            return this.numberOfColumns === 1;
-          },
-          confirmationRequired: true,
-          onClick: () => {
-            this.deleteColumn(this.selectedColumn);
-            this.hideToolboxes();
-          }
-        }
-      ],
-      onOpen: () => {
-        this.selectColumn(this.hoveredColumn);
-        this.hideRowToolbox();
-      },
-      onClose: () => {
-        this.unselectColumn();
-      }
-    });
-  }
-
-  /**
-   * Configures and creates the toolbox for manipulating with rows
-   *
-   * @returns {Toolbox}
-   */
-  createRowToolbox() {
-    return new Toolbox({
-      api: this.api,
-      cssModifier: 'row',
-      items: [
-        {
-          label: this.api.i18n.t('Add row above'),
-          icon: IconDirectionUpRight,
-          hideIf: () => {
-            return this.numberOfRows === this.config.maxrows
-          },
-          onClick: () => {
-            this.addRow(this.selectedRow, true);
-            this.hideToolboxes();
-          }
-        },
-        {
-          label: this.api.i18n.t('Add row below'),
-          icon: IconDirectionDownRight,
-          hideIf: () => {
-            return this.numberOfRows === this.config.maxrows
-          },
-          onClick: () => {
-            this.addRow(this.selectedRow + 1, true);
-            this.hideToolboxes();
-          }
-        },
-        {
-          label: this.api.i18n.t('Delete row'),
-          icon: IconCross,
-          hideIf: () => {
-            return this.numberOfRows === 1;
-          },
-          confirmationRequired: true,
-          onClick: () => {
-            this.deleteRow(this.selectedRow);
-            this.hideToolboxes();
-          }
-        }
-      ],
-      onOpen: () => {
-        this.selectRow(this.hoveredRow);
-        this.hideColumnToolbox();
-      },
-      onClose: () => {
-        this.unselectRow();
-      }
-    });
-  }
-
-  /**
-   * When you press enter it moves the cursor down to the next row
-   * or creates it if the click occurred on the last one
-   */
-  moveCursorToNextRow() {
-    if (this.focusedCell.row !== this.numberOfRows) {
-      this.focusedCell.row += 1;
-      this.focusCell(this.focusedCell);
-    } else {
-      this.addRow();
-      this.focusedCell.row += 1;
-      this.focusCell(this.focusedCell);
-      this.updateToolboxesPosition(0, 0);
-    }
-  }
-
-  /**
-   * Get table cell by row and col index
-   *
-   * @param {number} row - cell row coordinate
-   * @param {number} column - cell column coordinate
-   * @returns {HTMLElement}
-   */
-  getCell(row, column) {
-    return this.table.querySelectorAll(`.${CSS.row}:nth-child(${row}) .${CSS.cell}`)[column - 1];
-  }
-
-  /**
-   * Get table row by index
-   *
-   * @param {number} row - row coordinate
-   * @returns {HTMLElement}
-   */
-  getRow(row) {
-    return this.table.querySelector(`.${CSS.row}:nth-child(${row})`);
-  }
-
-  /**
-   * The parent of the cell which is the row
-   *
-   * @param {HTMLElement} cell - cell element
-   * @returns {HTMLElement}
-   */
-  getRowByCell(cell) {
-    return cell.parentElement;
-  }
-
-  /**
-   * Ger row's first cell
-   *
-   * @param {Element} row - row to find its first cell
-   * @returns {Element}
-   */
-  getRowFirstCell(row) {
-    return row.querySelector(`.${CSS.cell}:first-child`);
-  }
-
-  /**
-   * Set the sell's content by row and column numbers
-   *
-   * @param {number} row - cell row coordinate
-   * @param {number} column - cell column coordinate
-   * @param {string} content - cell HTML content
-   */
-  setCellContent(row, column, content) {
-    const cell = this.getCell(row, column);
-
-    cell.innerHTML = content;
-  }
-
-  /**
-   * Add column in table on index place
-   * Add cells in each row
-   *
-   * @param {number} columnIndex - number in the array of columns, where new column to insert, -1 if insert at the end
-   * @param {boolean} [setFocus] - pass true to focus the first cell
-   */
-  addColumn(columnIndex = -1, setFocus = false) {
-    let numberOfColumns = this.numberOfColumns;
-     /**
-      * Check if the number of columns has reached the maximum allowed columns specified in the configuration,
-      * and if so, exit the function to prevent adding more columns beyond the limit.
-      */
-    if (this.config && this.config.maxcols && this.numberOfColumns >= this.config.maxcols) {
-      return;
-  }
-
-    /**
-     * Iterate all rows and add a new cell to them for creating a column
-     */
-    for (let rowIndex = 1; rowIndex <= this.numberOfRows; rowIndex++) {
-      let cell;
-      const cellElem = this.createCell();
-
-      if (columnIndex > 0 && columnIndex <= numberOfColumns) {
-        cell = this.getCell(rowIndex, columnIndex);
-
-        $.insertBefore(cellElem, cell);
-      } else {
-        cell = this.getRow(rowIndex).appendChild(cellElem);
-      }
-
-      /**
-       * Autofocus first cell
-       */
-      if (rowIndex === 1) {
-        const firstCell = this.getCell(rowIndex, columnIndex > 0 ? columnIndex : numberOfColumns + 1);
-
-        if (firstCell && setFocus) {
-          $.focus(firstCell);
-        }
-      }
-    }
-
-    const addColButton = this.wrapper.querySelector(`.${CSS.addColumn}`);
-    if (this.config?.maxcols && this.numberOfColumns > this.config.maxcols - 1 && addColButton ){
-      addColButton.classList.add(CSS.addColumnDisabled);
-    }
-    this.addHeadingAttrToFirstRow();
-  };
-
-  /**
-   * Add row in table on index place
-   *
-   * @param {number} index - number in the array of rows, where new column to insert, -1 if insert at the end
-   * @param {boolean} [setFocus] - pass true to focus the inserted row
-   * @returns {HTMLElement} row
-   */
-  addRow(index = -1, setFocus = false) {
-    let insertedRow;
-    let rowElem = $.make('div', CSS.row);
-
-    if (this.tunes.withHeadings) {
-      this.removeHeadingAttrFromFirstRow();
-    }
-
-    /**
-     * We remember the number of columns, because it is calculated
-     * by the number of cells in the first row
-     * It is necessary that the first line is filled in correctly
-     */
-    let numberOfColumns = this.numberOfColumns;
-     /**
-      * Check if the number of rows has reached the maximum allowed rows specified in the configuration,
-      * and if so, exit the function to prevent adding more columns beyond the limit.
-      */  
-    if (this.config && this.config.maxrows && this.numberOfRows >= this.config.maxrows && addRowButton) {
-      return;
-    }
-
-    if (index > 0 && index <= this.numberOfRows) {
-      let row = this.getRow(index);
-
-      insertedRow = $.insertBefore(rowElem, row);
-    } else {
-      insertedRow = this.table.appendChild(rowElem);
-    }
-
-    this.fillRow(insertedRow, numberOfColumns);
-
-    if (this.tunes.withHeadings) {
-      this.addHeadingAttrToFirstRow();
-    }
-
-    const insertedRowFirstCell = this.getRowFirstCell(insertedRow);
-
-    if (insertedRowFirstCell && setFocus) {
-      $.focus(insertedRowFirstCell);
-    }
-
-    const addRowButton = this.wrapper.querySelector(`.${CSS.addRow}`);
-    if (this.config && this.config.maxrows && this.numberOfRows >= this.config.maxrows && addRowButton) {
-      addRowButton.classList.add(CSS.addRowDisabled);
-    }
-    return insertedRow;
-  };
-
-  /**
-   * Delete a column by index
-   *
-   * @param {number} index
-   */
-  deleteColumn(index) {
-    for (let i = 1; i <= this.numberOfRows; i++) {
-      const cell = this.getCell(i, index);
-
-      if (!cell) {
-        return;
-      }
-
-      cell.remove();
-    }
-    const addColButton = this.wrapper.querySelector(`.${CSS.addColumn}`);
-    if (addColButton) {
-      addColButton.classList.remove(CSS.addColumnDisabled);
-    }
-  }
-
-  /**
-   * Delete a row by index
-   *
-   * @param {number} index
-   */
-  deleteRow(index) {
-    this.getRow(index).remove();
-    const addRowButton = this.wrapper.querySelector(`.${CSS.addRow}`);
-    if (addRowButton) {
-      addRowButton.classList.remove(CSS.addRowDisabled);
-    }
-
-    this.addHeadingAttrToFirstRow();
-  }
-
-  /**
-   * Create a wrapper containing a table, toolboxes
-   * and buttons for adding rows and columns
-   *
-   * @returns {HTMLElement} wrapper - where all buttons for a table and the table itself will be
-   */
-  createTableWrapper() {
-    this.wrapper = $.make('div', CSS.wrapper);
-    this.table = $.make('div', CSS.table);
-
-    if (this.readOnly) {
-      this.wrapper.classList.add(CSS.wrapperReadOnly);
-    }
-
-    this.wrapper.appendChild(this.toolboxRow.element);
-    this.wrapper.appendChild(this.toolboxColumn.element);
-    this.wrapper.appendChild(this.table);
-
-    if (!this.readOnly) {
-      const addColumnButton = $.make('div', CSS.addColumn, {
-        innerHTML: IconPlus
-      });
-      const addRowButton = $.make('div', CSS.addRow, {
-        innerHTML: IconPlus
-      });
-
-      this.wrapper.appendChild(addColumnButton);
-      this.wrapper.appendChild(addRowButton);
-    }
-  }
-
-  /**
-   * Returns the size of the table based on initial data or config "size" property
-   *
-   * @return {{rows: number, cols: number}} - number of cols and rows
-   */
-  computeInitialSize() {
-    const content = this.data && this.data.content;
-    const isValidArray = Array.isArray(content);
-    const isNotEmptyArray = isValidArray ? content.length : false;
-    const contentRows = isValidArray ? content.length : undefined;
-    const contentCols = isNotEmptyArray ? content[0].length : undefined;
-    const parsedRows = Number.parseInt(this.config && this.config.rows);
-    const parsedCols = Number.parseInt(this.config && this.config.cols);
-
-    /**
-     * Value of config have to be positive number
-     */
-    const configRows = !isNaN(parsedRows) && parsedRows > 0 ? parsedRows : undefined;
-    const configCols = !isNaN(parsedCols) && parsedCols > 0 ? parsedCols : undefined;
-    const defaultRows = 2;
-    const defaultCols = 2;
-    const rows = contentRows || configRows || defaultRows;
-    const cols = contentCols || configCols || defaultCols;
-
-    return {
-      rows: rows,
-      cols: cols
-    };
-  }
-
-  /**
-   * Resize table to match config size or transmitted data size
-   *
-   * @return {{rows: number, cols: number}} - number of cols and rows
-   */
-  resize() {
-    const { rows, cols } = this.computeInitialSize();
-
-    for (let i = 0; i < rows; i++) {
-      this.addRow();
-    }
-
-    for (let i = 0; i < cols; i++) {
-      this.addColumn();
-    }
-  }
-
-  /**
-   * Fills the table with data passed to the constructor
-   *
-   * @returns {void}
-   */
-  fill() {
-    const data = this.data;
-
-    if (data && data.content) {
-      for (let i = 0; i < data.content.length; i++) {
-        for (let j = 0; j < data.content[i].length; j++) {
-          this.setCellContent(i + 1, j + 1, data.content[i][j]);
-        }
-      }
-    }
-  }
-
-  /**
-   * Fills a row with cells
-   *
-   * @param {HTMLElement} row - row to fill
-   * @param {number} numberOfColumns - how many cells should be in a row
-   */
-  fillRow(row, numberOfColumns) {
-    for (let i = 1; i <= numberOfColumns; i++) {
-      const newCell = this.createCell();
-
-      row.appendChild(newCell);
-    }
-  }
-
-  /**
-   * Creating a cell element
-   *
-   * @return {Element}
-   */
-  createCell() {
-    return $.make('div', CSS.cell, {
-      contentEditable: !this.readOnly
-    });
-  }
-
-  /**
-   * Get number of rows in the table
-   */
-  get numberOfRows() {
-    return this.table.childElementCount;
-  }
-
-  /**
-   * Get number of columns in the table
-   */
-  get numberOfColumns() {
-    if (this.numberOfRows) {
-      return this.table.querySelectorAll(`.${CSS.row}:first-child .${CSS.cell}`).length;
-    }
-
-    return 0;
-  }
-
-  /**
-   * Is the column toolbox menu displayed or not
-   *
-   * @returns {boolean}
-   */
-  get isColumnMenuShowing() {
-    return this.selectedColumn !== 0;
-  }
-
-  /**
-   * Is the row toolbox menu displayed or not
-   *
-   * @returns {boolean}
-   */
-  get isRowMenuShowing() {
-    return this.selectedRow !== 0;
-  }
-
-  /**
-   * Recalculate position of toolbox icons
-   *
-   * @param {Event} event - mouse move event
-   */
-  onMouseMoveInTable(event) {
-    const { row, column } = this.getHoveredCell(event);
-
-    this.hoveredColumn = column;
-    this.hoveredRow = row;
-
-    this.updateToolboxesPosition();
-  }
-
-  /**
-   * Prevents default Enter behaviors
-   * Adds Shift+Enter processing
-   *
-   * @param {KeyboardEvent} event - keypress event
-   */
-  onKeyPressListener(event) {
-    if (event.key === 'Enter') {
-      if (event.shiftKey) {
-        return true;
-      }
-
-      this.moveCursorToNextRow();
-    }
-
-    return event.key !== 'Enter';
-  };
-
-  /**
-   * Prevents tab keydown event from bubbling
-   * so that it only works inside the table
-   *
-   * @param {KeyboardEvent} event - keydown event
-   */
-  onKeyDownListener(event) {
-    if (event.key === 'Tab') {
-      event.stopPropagation();
-    }
-  }
-
-  /**
-   * Set the coordinates of the cell that the focus has moved to
-   *
-   * @param {FocusEvent} event - focusin event
-   */
-  focusInTableListener(event) {
-    const cell = event.target;
-    const row = this.getRowByCell(cell);
-
-    this.focusedCell = {
-      row: Array.from(this.table.querySelectorAll(`.${CSS.row}`)).indexOf(row) + 1,
-      column: Array.from(row.querySelectorAll(`.${CSS.cell}`)).indexOf(cell) + 1
-    };
-  }
-
-  /**
-   * Unselect row/column
-   * Close toolbox menu
-   * Hide toolboxes
-   *
-   * @returns {void}
-   */
-  hideToolboxes() {
-    this.hideRowToolbox();
-    this.hideColumnToolbox();
-    this.updateToolboxesPosition();
-  }
-
-  /**
-   * Unselect row, close toolbox
-   *
-   * @returns {void}
-   */
-  hideRowToolbox() {
-    this.unselectRow();
-    this.toolboxRow.hide();
-  }
-  /**
-   * Unselect column, close toolbox
-   *
-   * @returns {void}
-   */
-  hideColumnToolbox() {
-    this.unselectColumn();
-
-    this.toolboxColumn.hide();
-  }
-
-  /**
-   * Set the cursor focus to the focused cell
-   *
-   * @returns {void}
-   */
-  focusCell() {
-    this.focusedCellElem.focus();
-  }
-
-  /**
-   * Get current focused element
-   *
-   * @returns {HTMLElement} - focused cell
-   */
-  get focusedCellElem() {
-    const { row, column } = this.focusedCell;
-
-    return this.getCell(row, column);
-  }
-
-  /**
-   * Update toolboxes position
-   *
-   * @param {number} row - hovered row
-   * @param {number} column - hovered column
-   */
-  updateToolboxesPosition(row = this.hoveredRow, column = this.hoveredColumn) {
-    if (!this.isColumnMenuShowing) {
-      if (column > 0 && column <= this.numberOfColumns) { // not sure this statement is needed. Maybe it should be fixed in getHoveredCell()
-        this.toolboxColumn.show(() => {
-          return {
-            left: `calc((100% - var(--cell-size)) / (${this.numberOfColumns} * 2) * (1 + (${column} - 1) * 2))`
-          };
-        });
-      }
-    }
-
-    if (!this.isRowMenuShowing) {
-      if (row > 0 && row <= this.numberOfRows) { // not sure this statement is needed. Maybe it should be fixed in getHoveredCell()
-        this.toolboxRow.show(() => {
-          const hoveredRowElement = this.getRow(row);
-          const { fromTopBorder } = $.getRelativeCoordsOfTwoElems(this.table, hoveredRowElement);
-          const { height } = hoveredRowElement.getBoundingClientRect();
-
-          return {
-            top: `${Math.ceil(fromTopBorder + height / 2)}px`
-          };
-        });
-      }
-    }
-  }
-
-  /**
-   * Makes the first row headings
-   *
-   * @param {boolean} withHeadings - use headings row or not
-   */
-  setHeadingsSetting(withHeadings) {
-    this.tunes.withHeadings = withHeadings;
-
-    if (withHeadings) {
-      this.table.classList.add(CSS.withHeadings);
-      this.addHeadingAttrToFirstRow();
-    } else {
-      this.table.classList.remove(CSS.withHeadings);
-      this.removeHeadingAttrFromFirstRow();
-    }
-  }
-
-  /**
-   * Adds an attribute for displaying the placeholder in the cell
-   */
-  addHeadingAttrToFirstRow() {
-    for (let cellIndex = 1; cellIndex <= this.numberOfColumns; cellIndex++) {
-      let cell = this.getCell(1, cellIndex);
-
-      if (cell) {
-        cell.setAttribute('heading', this.api.i18n.t('Heading'));
-      }
-    }
-  }
-
-  /**
-   * Removes an attribute for displaying the placeholder in the cell
-   */
-  removeHeadingAttrFromFirstRow() {
-    for (let cellIndex = 1; cellIndex <= this.numberOfColumns; cellIndex++) {
-      let cell = this.getCell(1, cellIndex);
-
-      if (cell) {
-        cell.removeAttribute('heading');
-      }
-    }
-  }
-
-  /**
-   * Add effect of a selected row
-   *
-   * @param {number} index
-   */
-  selectRow(index) {
-    const row = this.getRow(index);
-
-    if (row) {
-      this.selectedRow = index;
-      row.classList.add(CSS.rowSelected);
-    }
-  }
-
-  /**
-   * Remove effect of a selected row
-   */
-  unselectRow() {
-    if (this.selectedRow <= 0) {
-      return;
-    }
-
-    const row = this.table.querySelector(`.${CSS.rowSelected}`);
-
-    if (row) {
-      row.classList.remove(CSS.rowSelected);
-    }
-
-    this.selectedRow = 0;
-  }
-
-  /**
-   * Add effect of a selected column
-   *
-   * @param {number} index
-   */
-  selectColumn(index) {
-    for (let i = 1; i <= this.numberOfRows; i++) {
-      const cell = this.getCell(i, index);
-
-      if (cell) {
-        cell.classList.add(CSS.cellSelected);
-      }
-    }
-
-    this.selectedColumn = index;
-  }
-
-  /**
-   * Remove effect of a selected column
-   */
-  unselectColumn() {
-    if (this.selectedColumn <= 0) {
-      return;
-    }
-
-    let cells = this.table.querySelectorAll(`.${CSS.cellSelected}`);
-
-    Array.from(cells).forEach(column => {
-      column.classList.remove(CSS.cellSelected);
-    });
-
-    this.selectedColumn = 0;
-  }
-
-  /**
-   * Calculates the row and column that the cursor is currently hovering over
-   * The search was optimized from O(n) to O (log n) via bin search to reduce the number of calculations
-   *
-   * @param {Event} event - mousemove event
-   * @returns hovered cell coordinates as an integer row and column
-   */
-  getHoveredCell(event) {
-    let hoveredRow = this.hoveredRow;
-    let hoveredColumn = this.hoveredColumn;
-    const { width, height, x, y } = $.getCursorPositionRelativeToElement(this.table, event);
-
-    // Looking for hovered column
-    if (x >= 0) {
-      hoveredColumn = this.binSearch(
-        this.numberOfColumns,
-        (mid) => this.getCell(1, mid),
-        ({ fromLeftBorder }) => x < fromLeftBorder,
-        ({ fromRightBorder }) => x > (width - fromRightBorder)
-      );
-    }
-
-    // Looking for hovered row
-    if (y >= 0) {
-      hoveredRow = this.binSearch(
-        this.numberOfRows,
-        (mid) => this.getCell(mid, 1),
-        ({ fromTopBorder }) => y < fromTopBorder,
-        ({ fromBottomBorder }) => y > (height - fromBottomBorder)
-      );
-    }
-
-    return {
-      row: hoveredRow || this.hoveredRow,
-      column: hoveredColumn || this.hoveredColumn
-    };
-  }
-
-  /**
-   * Looks for the index of the cell the mouse is hovering over.
-   * Cells can be represented as ordered intervals with left and
-   * right (upper and lower for rows) borders inside the table, if the mouse enters it, then this is our index
-   *
-   * @param {number} numberOfCells - upper bound of binary search
-   * @param {function} getCell - function to take the currently viewed cell
-   * @param {function} beforeTheLeftBorder - determines the cursor position, to the left of the cell or not
-   * @param {function} afterTheRightBorder - determines the cursor position, to the right of the cell or not
-   * @returns {number}
-   */
-  binSearch(numberOfCells, getCell, beforeTheLeftBorder, afterTheRightBorder) {
-    let leftBorder = 0;
-    let rightBorder = numberOfCells + 1;
-    let totalIterations = 0;
-    let mid;
-
-    while (leftBorder < rightBorder - 1 && totalIterations < 10) {
-      mid = Math.ceil((leftBorder + rightBorder) / 2);
-
-      const cell = getCell(mid);
-      const relativeCoords = $.getRelativeCoordsOfTwoElems(this.table, cell);
-
-      if (beforeTheLeftBorder(relativeCoords)) {
-        rightBorder = mid;
-      } else if (afterTheRightBorder(relativeCoords)) {
-        leftBorder = mid;
-      } else {
-        break;
-      }
-
-      totalIterations++;
-    }
-
-    return mid;
-  }
-
-  /**
-   * Collects data from cells into a two-dimensional array
-   *
-   * @returns {string[][]}
-   */
-  getData() {
-    const data = [];
-
-    for (let i = 1; i <= this.numberOfRows; i++) {
-      const row = this.table.querySelector(`.${CSS.row}:nth-child(${i})`);
-      const cells = Array.from(row.querySelectorAll(`.${CSS.cell}`));
-      const isEmptyRow = cells.every(cell => !cell.textContent.trim());
-
-      if (isEmptyRow) {
-        continue;
-      }
-
-      data.push(cells.map(cell => cell.innerHTML));
-    }
-
-    return data;
-  }
-
-  /**
-   * Remove listeners on the document
-   */
-  destroy() {
-    document.removeEventListener('click', this.documentClicked);
-  }
+	/**
+	 * Creates
+	 *
+	 * @constructor
+	 * @param {boolean} readOnly - read-only mode flag
+	 * @param {object} api - Editor.js API
+	 * @param {TableData} data - Editor.js API
+	 * @param {TableConfig} config - Editor.js API
+	 */
+	constructor(readOnly, api, data, config) {
+		this.readOnly = readOnly;
+		this.api = api;
+		this.data = data;
+		this.config = config;
+		/**
+		 * DOM nodes
+		 */
+		this.wrapper = null;
+		this.table = null;
+
+		/**
+		 * Toolboxes
+		 */
+		this.toolboxRow = this.createRowToolbox();
+		this.toolboxColumn = this.createColumnToolbox();
+		this.toolboxCell = null;
+
+		/**
+		 * Elements
+		 */
+		this.focusedCell = null;
+
+		/**
+		 * Data
+		 */
+		this.validateData();
+		const { rows, cols } = this.computeSize();
+		this.rows = rows;
+		this.cols = cols;
+		this.focusedRow = -1;
+		this.focusedCol = -1;
+
+		/**
+		 * Create table and wrapper elements
+		 */
+		this.createTableWrapper();
+
+		// Additional settings for the table
+		this.tunes = {
+			withHeadings: data.withHeadings
+		};
+
+		this.render();
+
+		/**
+		 * Global click listener allows to delegate clicks on some elements
+		 */
+		this.documentClicked = (event) => {
+			const clickedInsideTable = event.target.closest(`.${CSS.table}`) !== null;
+			const outsideTableClicked = event.target.closest(`.${CSS.wrapper}`) === null;
+			const clickedOutsideToolboxes = clickedInsideTable || outsideTableClicked;
+
+			if (clickedOutsideToolboxes) {
+				//this.hideToolboxes();
+			}
+
+			const clickedOnAddRowButton = event.target.closest(`.${CSS.addRow}`);
+			const clickedOnAddColumnButton = event.target.closest(`.${CSS.addColumn}`);
+
+			/**
+			 * Also, check if clicked in current table, not other (because documentClicked bound to the whole document)
+			 */
+			if (clickedOnAddRowButton && clickedOnAddRowButton.parentNode === this.wrapper) {
+				this.addRow(undefined, true);
+				this.closeCellToolbox();
+			} else if (clickedOnAddColumnButton && clickedOnAddColumnButton.parentNode === this.wrapper) {
+				this.addColumn(undefined, true);
+				this.closeCellToolbox();
+			}
+		};
+
+		if (!this.readOnly) {
+			this.bindEvents();
+		}
+	}
+
+	/**
+	 * Setup empty data based on config parameters
+	 *
+	 */
+	validateData() {
+		const isValidArray = Array.isArray(this.data.content);
+		const isEmptyArray = isValidArray ? this.data.content.length === 0 : false;
+
+		if (isEmptyArray) {
+
+			const parsedRows = Number.parseInt(this.config && this.config.rows);
+			const parsedCols = Number.parseInt(this.config && this.config.cols);
+
+			const configRows = !isNaN(parsedRows) && parsedRows > 0 ? parsedRows : undefined;
+			const configCols = !isNaN(parsedCols) && parsedCols > 0 ? parsedCols : undefined;
+			const defaultRows = 2;
+			const defaultCols = 2;
+
+			const rows = configRows || defaultRows;
+			const cols = configCols || defaultCols;
+
+			for (let i = 0; i < rows; i++) {
+				let row = [];
+				for (let j = 0; j < cols; j++) {
+					row.push('');
+				}
+				this.data.content.push(row);
+			}
+		}
+	}
+
+	/**
+	 * Returns the size of the table based on initial data
+	 *
+	 * @return {{rows: number, cols: number}} - number of cols and rows
+	 */
+	computeSize() {
+		const content = this.data && this.data.content;
+		const isValidArray = Array.isArray(content);
+
+		const contentRows = isValidArray ? content.length : undefined;
+
+		let contentCols = 0;
+		for (let i = 0; i < content.length; i++) {
+			let rowCols = 0;
+			for (let j = 0; j < content[i].length; j++) {
+				rowCols++;
+			}
+			contentCols = Math.max(contentCols, rowCols);
+		}
+
+		const rows = contentRows;
+		const cols = contentCols;
+
+		return {
+			rows: rows,
+			cols: cols
+		};
+	}
+
+	/**
+	 * Render the table with data passed to the constructor
+	 *
+	 * @returns {void}
+	 */
+	render() {
+		const data = this.data;
+
+		if (data && data.content) {
+
+			this.emptyTable();
+
+			for (let i = 0; i < data.content.length; i++) {
+				let rowElement = $.make('tr', CSS.row);
+
+				for (let j = 0; j < data.content[i].length; j++) {
+					let cellData = data.content[i][j];
+					//let tag = this.tunes.withHeadings && i == 0 ? 'th' : 'td';
+					let tag = 'td';
+					let cellElement = $.make(tag, CSS.cell, {
+						contentEditable: !this.readOnly
+					});
+					if (typeof cellData === 'object') {
+						cellElement.innerHTML = cellData.content;
+						if (cellData.hasOwnProperty('colspan')) {
+							cellElement.setAttribute('colspan', cellData.colspan);
+						}
+						if (cellData.hasOwnProperty('rowspan')) {
+							cellElement.setAttribute('rowspan', cellData.rowspan);
+						}
+					} else {
+						cellElement.innerHTML = cellData;
+					}
+					rowElement.appendChild(cellElement);
+				}
+				this.table.appendChild(rowElement);
+			}
+		}
+	}
+
+	/**
+	 * Empty Table element
+	 */
+	emptyTable() {
+		while (this.table.hasChildNodes()) {
+			this.table.removeChild(this.table.lastChild);
+		}
+	}
+
+	/**
+	 * Add row in table on index place
+	 *
+	 * @param {number} index - number in the array of rows, where new row to insert, -1 if insert at the end
+	 */
+	addRow(index = -1) {
+		this.rows++;
+		if (index === -1) {
+			index = this.rows;
+		}
+
+		let row = [];
+		for (let j = 0; j < this.cols; j++) {
+			row.push('');
+		}
+
+		this.data.content.splice(index, 0, row);
+
+		this.render()
+	};
+
+	/**
+	 * Delete a row by index
+	 *
+	 * @param {number} index
+	 */
+	deleteRow(index){
+		this.rows--;
+
+		this.data.content.splice(index, 1);
+
+		this.render()
+	}
+
+	/**
+	 * Add column in table on index place
+	 *
+	 * @param {number} index - number in the array of columns, where new column to insert, -1 if insert at the end
+	 */
+	addColumn(index = -1) {
+		this.cols++;
+
+		if (index === -1) {
+			index = this.cols;
+		}
+
+		for (let i = 0; i < this.data.content.length; i++) {
+			this.data.content[i].splice(index, 0, '');
+		}
+
+		this.render()
+	};
+
+	/**
+	 * Delete a column by index
+	 *
+	 * @param {number} index
+	 */
+	deleteColumn(index) {
+		this.cols--;
+
+		for (let i = 0; i < this.data.content.length; i++) {
+			this.data.content[i].splice(index, 1);
+		}
+
+		this.render()
+	};
+
+	saveData() {
+		const data = [];
+
+		const rows = this.table.querySelectorAll(`.${CSS.row}`);
+		rows.forEach((row) => {
+			const cells = Array.from(row.querySelectorAll(`.${CSS.cell}`));
+			data.push(cells.map(cell => {
+				let obj = { content: cell.innerHTML }
+				let colspan = cell.getAttribute('colspan');
+				if (colspan) {
+					obj.colspan = colspan;
+				}
+				let rowspan = cell.getAttribute('rowspan');
+				if (rowspan) {
+					obj.rowspan = rowspan;
+				}
+
+				if (!colspan && !rowspan)
+					return cell.innerHTML;
+
+				return obj;
+			}));
+		})
+
+		this.data.content = data;
+
+		return data;
+	}
+
+	/**
+	 * Create a wrapper containing a table, toolboxes
+	 * and buttons for adding rows and columns
+	 *
+	 * @returns {HTMLElement} wrapper - where all buttons for a table and the table itself will be
+	 */
+	createTableWrapper() {
+		this.wrapper = $.make('div', CSS.wrapper);
+		this.table = $.make('table', CSS.table);
+
+		if (this.readOnly) {
+			this.wrapper.classList.add(CSS.wrapperReadOnly);
+		}
+
+		this.wrapper.appendChild(this.toolboxColumn.element);
+		this.wrapper.appendChild(this.toolboxRow.element);
+		this.wrapper.appendChild(this.table);
+
+		if (!this.readOnly) {
+			const addColumnButton = $.make('div', CSS.addColumn, {
+				innerHTML: IconPlus
+			});
+			const addRowButton = $.make('div', CSS.addRow, {
+				innerHTML: IconPlus
+			});
+
+			this.wrapper.appendChild(addColumnButton);
+			this.wrapper.appendChild(addRowButton);
+		}
+	}
+
+	/**
+	 * Returns the rendered table wrapper
+	 *
+	 * @returns {Element}
+	 */
+	getWrapper() {
+		return this.wrapper;
+	}
+
+	/**
+	 * Hangs the necessary handlers to events
+	 */
+	bindEvents() {
+		// set the listener to close toolboxes when click outside
+		document.addEventListener('click', this.documentClicked);
+
+		// Controls some of the keyboard buttons inside the table
+		this.table.onkeypress = (event) => this.onKeyPressListener(event);
+
+		// Tab is executed by default before keypress, so it must be intercepted on keydown
+		this.table.addEventListener('keydown', (event) => this.onKeyDownListener(event));
+
+		// Determine the position of the cell in focus
+		this.table.addEventListener('focusin', event => this.focusInTableListener(event));
+
+		// Save data every focusout
+		this.table.addEventListener('focusout', (event) => this.focusOutTableListener(event));
+	}
+
+	/**
+ * Configures and creates the toolbox for manipulating with columns
+ *
+ * @returns {Toolbox}
+ */
+	createColumnToolbox() {
+		return new Toolbox({
+			api: this.api,
+			cssModifier: 'column',
+			items: [
+				{
+					label: this.api.i18n.t('Add column to left'),
+					icon: IconDirectionLeftDown,
+					hideIf: () => {
+						return false;
+					},
+					onClick: () => {
+						this.addColumn(this.focusedCol);
+						this.closeCellToolbox();
+						this.toolboxRow.hide();
+						this.toolboxColumn.hide();
+					}
+				},
+				{
+					label: this.api.i18n.t('Add column to right'),
+					icon: IconDirectionRightDown,
+					hideIf: () => {
+						return false;
+					},
+					onClick: () => {
+						this.addColumn(this.focusedCol + 1);
+						this.closeCellToolbox();
+						this.toolboxRow.hide();
+						this.toolboxColumn.hide();
+					}
+				},
+				{
+					label: this.api.i18n.t('Delete column'),
+					icon: IconCross,
+					hideIf: () => {
+						return this.cols === 1;
+					},
+					confirmationRequired: true,
+					onClick: () => {
+						this.deleteColumn(this.focusedCol);
+						this.closeCellToolbox();
+						this.toolboxRow.hide();
+						this.toolboxColumn.hide();
+					}
+				}
+			],
+			onOpen: () => {
+				this.toolboxRow.popover.close();
+				this.toolboxCell.popover.close();
+			},
+			onClose: () => {
+			}
+		});
+	}
+
+	/**
+	 * Configures and creates the toolbox for manipulating with rows
+	 *
+	 * @returns {Toolbox}
+	 */
+	createRowToolbox() {
+		return new Toolbox({
+			api: this.api,
+			cssModifier: 'row',
+			items: [
+				{
+					label: this.api.i18n.t('Add row above'),
+					icon: IconDirectionUpRight,
+					hideIf: () => {
+						return false;
+					},
+					onClick: () => {
+						this.addRow(this.focusedRow);
+						this.closeCellToolbox();
+						this.toolboxRow.hide();
+						this.toolboxColumn.hide();
+					}
+				},
+				{
+					label: this.api.i18n.t('Add row below'),
+					icon: IconDirectionDownRight,
+					hideIf: () => {
+						return false;
+					},
+					onClick: () => {
+						this.addRow(this.focusedRow+1);
+						this.closeCellToolbox();
+						this.toolboxRow.hide();
+						this.toolboxColumn.hide();
+					}
+				},
+				{
+					label: this.api.i18n.t('Delete row'),
+					icon: IconCross,
+					hideIf: () => {
+						return this.rows === 1;
+					},
+					confirmationRequired: true,
+					onClick: () => {
+						this.deleteRow(this.focusedRow);
+						this.closeCellToolbox();
+						this.toolboxRow.hide();
+						this.toolboxColumn.hide();
+					}
+				}
+			],
+			onOpen: () => {
+				this.toolboxColumn.popover.close();
+				this.toolboxCell.popover.close();
+			},
+			onClose: () => {
+			}
+		});
+	}
+
+
+	/**
+	 * Configures and creates the toolbox for manipulating with cells
+	 *
+	 * @returns {Toolbox}
+	 */
+	createCellToolbox() {
+		return new Toolbox({
+			api: this.api,
+			cssModifier: 'cell',
+			items: [
+				{
+					label: this.api.i18n.t('Merge to Up'),
+					icon: IconChevronUp,
+					hideIf: () => {
+						if (this.focusedRow === 0 || this.data.withHeadings && this.focusedRow === 1)
+							return true;
+
+						let maxNumberofRows = this.data.withHeadings ? this.rows - 1 : this.rows;
+						let focusedRowspan = this.getIntAttribute(this.focusedCell, 'rowspan');
+						if (focusedRowspan === maxNumberofRows)
+							return true;
+
+						let focusedRow = this.focusedCell.parentElement;
+
+						let prevRow = focusedRow;
+						focusedRowspan = 1;
+						while (focusedRowspan !== 0) {
+							focusedRowspan--;
+							prevRow = prevRow.previousElementSibling;
+							let prevRowspan = this.getIntAttribute(prevRow, 'rowspan');
+							focusedRowspan += prevRowspan - 1;
+						}
+	
+
+						if (focusedRow.children.length !== prevRow.children.length)
+							return true;
+
+						return false;
+					},
+					onClick: () => {
+						this.mergeUp();
+						this.closeCellToolbox();
+					}
+				},
+				{
+					label: this.api.i18n.t('Merge to Right'),
+					icon: IconChevronRight,
+					hideIf: () => {
+						let nextElement = this.focusedCell.nextElementSibling;
+						if (nextElement === null || nextElement === undefined)
+							return true;
+
+						let focusedRowspan = this.getIntAttribute(this.focusedCell, 'rowspan');
+						let nextRowspan = this.getIntAttribute(nextElement, 'rowspan');
+						if (focusedRowspan !== nextRowspan)
+							return true;
+
+						let colspan = this.getIntAttribute(this.focusedCell, 'colspan');
+						if (colspan === this.cols)
+							return true;
+
+						return false;
+					},
+					onClick: () => {
+						this.mergeRight();
+						this.closeCellToolbox();
+					}
+				},
+				{
+					label: this.api.i18n.t('Merge to Down'),
+					icon: IconChevronDown,
+					hideIf: () => {
+						if (this.data.withHeadings && this.focusedRow === 0)
+							return true;
+
+						let maxNumberofRows = this.data.withHeadings ? this.rows - 1 : this.rows;
+						let focusedRowspan = this.getIntAttribute(this.focusedCell, 'rowspan');
+						if (focusedRowspan === maxNumberofRows)
+							return true;
+
+						let focusedRow = this.focusedCell.parentElement;
+
+						let nextRow = focusedRow;
+						while (focusedRowspan !== 0) {
+							focusedRowspan--;
+							nextRow = nextRow.nextElementSibling;
+							let nextRowspan = this.getIntAttribute(nextRow, 'rowspan');
+							focusedRowspan += nextRowspan - 1;
+						}
+
+
+						if (focusedRow.children.length !== nextRow.children.length)
+							return true;
+
+						return false;
+					},
+					onClick: () => {
+						this.mergeDown();
+						this.closeCellToolbox();
+					}
+				},
+				{
+					label: this.api.i18n.t('Merge to Left'),
+					icon: IconChevronLeft,
+					hideIf: () => {
+						let prevElement = this.focusedCell.previousElementSibling;
+						if (prevElement === null || prevElement === undefined)
+							return true;
+
+						let focusedRowspan = this.getIntAttribute(this.focusedCell, 'rowspan');
+						let prevRowspan = this.getIntAttribute(prevElement, 'rowspan');
+						if (focusedRowspan !== prevRowspan)
+							return true;
+
+						let colspan = this.getIntAttribute(this.focusedCell, 'colspan');
+						if (colspan === this.cols)
+							return true;
+
+						return false;
+					},
+					onClick: () => {
+						this.mergeLeft();
+						this.closeCellToolbox();
+					}
+				},
+			],
+			onOpen: () => {
+				this.toolboxColumn.popover.close();
+				this.toolboxRow.popover.close();
+			},
+			onClose: () => {
+			}
+		});
+	}
+
+	/**
+	 * Merge Up
+	 */
+	mergeUp() {
+		let prevRow = this.table.querySelector(`.${CSS.row}:nth-child(${this.focusedRow})`)
+		let prevCell = prevRow.querySelector(`.${CSS.cell}:nth-child(${this.focusedCol + 1})`);
+
+		if (prevCell === null || prevCell === undefined)
+			return;
+
+		let currentRowSpan = this.getIntAttribute(this.focusedCell, 'rowspan');
+		let prevRowSpan = this.getIntAttribute(prevCell, 'rowspan');
+		prevCell.setAttribute('rowspan', currentRowSpan + prevRowSpan);
+		prevCell.innerHTML = `${prevCell.innerHTML} ${this.focusedCell.innerHTML}`.trim();
+		this.focusedCell.remove();
+
+		this.saveData();
+		this.render();
+	}
+
+	/**
+	 * Merge Right
+	 */
+	mergeRight() {
+		let nextCell = this.focusedCell.nextElementSibling;
+		if (nextCell === null || nextCell === undefined)
+			return;
+
+		let currentColSpan = this.getIntAttribute(this.focusedCell, 'colspan');
+		let nextColSpan = this.getIntAttribute(nextCell, 'colspan');
+		this.focusedCell.setAttribute('colspan', currentColSpan + nextColSpan);
+		this.focusedCell.innerHTML = `${this.focusedCell.innerHTML} ${nextCell.innerHTML}`.trim();
+		nextCell.remove();
+
+		this.saveData();
+		this.render();
+	}
+
+	/**
+	 * Merge Down
+	 */
+	mergeDown() {
+		let focusedRowspan = this.getIntAttribute(this.focusedCell, 'rowspan');
+		let nthRow = this.focusedRow + 1 + focusedRowspan;
+		let nextRow = this.table.querySelector(`.${CSS.row}:nth-child(${nthRow})`)
+		let nextCell = nextRow.querySelector(`.${CSS.cell}:nth-child(${this.focusedCol + 1})`);
+		let nextRowspan = this.getIntAttribute(this.focusedCell, 'rowspan');
+		if (nextCell === null || nextCell === undefined)
+			return;
+
+		let currentRowSpan = this.getIntAttribute(this.focusedCell, 'rowspan');
+		let nextRowSpan = this.getIntAttribute(nextCell, 'rowspan');
+		this.focusedCell.setAttribute('rowspan', currentRowSpan + nextRowSpan);
+		this.focusedCell.innerHTML = `${this.focusedCell.innerHTML} ${nextCell.innerHTML}`.trim();
+		nextCell.remove();
+
+		this.saveData();
+		this.render();
+	}
+
+	/**
+	 * Merge Left
+	 */
+	mergeLeft() {
+		this.focusedCell = this.focusedCell.previousElementSibling;
+		this.mergeRight();
+	}
+
+
+
+	/**
+	 * generate and place cellToolbox
+	 * 
+	 */
+	generateAndPlaceCellToolbox() {
+		this.toolboxCell = this.createCellToolbox();
+
+		this.table.appendChild(this.toolboxCell.element);
+
+		const { fromTopBorder, fromLeftBorder } = $.getRelativeCoordsOfTwoElems(this.table, this.focusedCell);
+		const cellRect = this.focusedCell.getBoundingClientRect();
+		const toolboxRect = this.toolboxCell.element.getBoundingClientRect();
+
+		this.toolboxCell.show(() => {
+			return {
+				top: `${fromTopBorder}px`,
+				left: `${fromLeftBorder + cellRect.width - toolboxRect.width}px`
+			}
+		});
+	}
+
+	/**
+	 * close cellToolbox
+	 * 
+	 */
+	closeCellToolbox() {
+		this.toolboxCell?.element.remove();
+		this.toolboxCell = null;
+	}
+
+	focusInTableListener(event) {
+		this.focusedCell?.classList.remove(`${CSS.cellSelected}`);
+		this.closeCellToolbox();
+		this.toolboxRow.hide();
+		this.toolboxColumn.hide();
+
+		this.focusedCell = event.target;
+		this.focusedCell.classList.add(`${CSS.cellSelected}`);
+
+		this.focusedRow = this.focusedCell.parentElement.rowIndex;
+		this.focusedCol = this.focusedCell.cellIndex;
+
+		this.generateAndPlaceCellToolbox();
+		this.updateToolboxesPosition();
+	}
+
+	/**
+ * Update toolboxes position
+ *
+ */
+	updateToolboxesPosition() {
+
+		this.toolboxRow.hide();
+		this.toolboxColumn.hide();
+
+		this.toolboxRow.show(() => {
+			const focusedRow  = this.focusedCell.parentElement;
+			const { fromTopBorder } = $.getRelativeCoordsOfTwoElems(this.table, focusedRow);
+			const { height } = focusedRow.getBoundingClientRect();
+
+			return {
+				top: `${Math.ceil(fromTopBorder + height / 2)}px`
+			};
+		});
+
+		this.toolboxColumn.show(() => {
+			return {
+				left: `calc((100% - var(--cell-size)) / (${this.cols} * 2) * (1 + (${this.focusedCol}) * 2))`
+			};
+		});
+
+	}
+
+	focusOutTableListener(event) {
+		this.saveData();
+		// this.focusedCell?.classList.remove(`${CSS.cellSelected}`);
+		// this.closeCellToolbox();
+		// this.focusedCell = null;
+	}
+
+	/**
+ * Prevents default Enter behaviors
+ * Adds Shift+Enter processing
+ *
+ * @param {KeyboardEvent} event - keypress event
+ */
+	onKeyPressListener(event) {
+		if (event.key === 'Enter') {
+			if (event.shiftKey) {
+				return true;
+			}
+
+			this.moveCursorToNextRow();
+		}
+
+		return event.key !== 'Enter';
+	};
+
+	/**
+	 * Prevents tab keydown event from bubbling
+	 * so that it only works inside the table
+	 *
+	 * @param {KeyboardEvent} event - keydown event
+	 */
+	onKeyDownListener(event) {
+		if (event.key === 'Tab') {
+			event.stopPropagation();
+		}
+	}
+
+	/**
+	 * Makes the first row headings
+	 *
+	 * @param {boolean} withHeadings - use headings row or not
+	 */
+	setHeadingsSetting(withHeadings) {
+		this.tunes.withHeadings = withHeadings;
+
+		if (withHeadings) {
+			this.table.classList.add(CSS.withHeadings);
+		} else {
+			this.table.classList.remove(CSS.withHeadings);
+		}
+	}
+
+	/**
+	 * return data.content
+	 *
+	 * @returns {object[][]}
+	 */
+	getData() {
+		return this.data.content;
+	}
+
+	/**
+	 * Get attribute and parse to number
+	 *
+	 * @param {HTMLElement} element
+	 * @param {string} attributeName
+	 * @param {number} defaultValue
+	 */
+	getIntAttribute(element, attributeName, defaultValue = 1) {
+		return Number(element.getAttribute(attributeName) ?? defaultValue);
+	}
 }

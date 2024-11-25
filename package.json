@@ -1,9 +1,9 @@
 {
-  "name": "@editorjs/table",
-  "description": "Table for Editor.js",
-  "version": "2.4.2",
+  "name": "editorjs-adv-table",
+  "description": "Advanced Table for Editor.js",
+  "version": "1.0.0",
   "license": "MIT",
-  "repository": "https://github.com/editor-js/table",
+  "repository": "https://github.com/mind-ra/adv-table",
   "files": [
     "dist"
   ],
@@ -23,15 +23,17 @@
     "lint": "eslint -c ./.eslintrc --ext .js --fix ."
   },
   "author": {
-    "name": "CodeX Team",
-    "email": "team@ifmo.su"
+    "name": "Angelo Rotta",
+    "email": "angelo.rotta@minddesign.it"
   },
   "keywords": [
     "codex",
     "codex-editor",
     "table",
     "editor.js",
-    "editorjs"
+    "editorjs",
+    "merge columns",
+    "merge rows"
   ],
   "devDependencies": {
     "autoprefixer": "^9.3.1",
@@ -48,6 +50,6 @@
     "typescript": "^5.5.4"
   },
   "dependencies": {
-    "@codexteam/icons": "^0.0.6"
+    "@codexteam/icons": "0.3.2"
   }
 }

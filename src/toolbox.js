@@ -137,7 +137,7 @@ export default class Toolbox {
     const position = computePositionMethod();
 
     /**
-     * Set 'top' or 'left' style
+     * Set styles
      */
     Object.entries(position).forEach(([prop, value]) => {
       this.wrapper.style[prop] = value;

@@ -11,12 +11,21 @@
   opacity: 0;
   transition: opacity 0.1s;
 
-  will-change: left, opacity;
+  will-change: left, top, opacity;
 
-  &--column {
+	.tc-popover {
+		position: absolute;
+  }
+
+	&--column {
     top: calc(-1 * (var(--toggler-click-zone-size)));
     transform: translateX(calc(-1 * var(--toggler-click-zone-size) / 2));
     will-change: left, opacity;
+
+		.tc-popover {
+			top: 100%;
+			right: 0;
+		}
   }
 
   &--row {
@@ -24,17 +33,27 @@
     transform: translateY(calc(-1 * var(--toggler-click-zone-size) / 2));
     margin-top: -1px; /* because of top border */
     will-change: top, opacity;
+
+		.tc-popover {
+			top: 0;
+			left: 100%;
+		}
+  }
+
+	&--cell {
+    will-change: left, top, opacity;
+
+		.tc-popover {
+			top: 0;
+			right: 100%;
+		}
   }
 
   &--showed {
     opacity: 1;
   }
 
-  .tc-popover {
-    position: absolute;
-    top: 0;
-    left: var(--popover-margin)
-  }
+
 
   &__toggler {
     display: flex;
@@ -43,20 +62,15 @@
     width: var(--toggler-click-zone-size);
     height: var(--toggler-click-zone-size);
     color: var(--toggler-dots-color);
-    opacity: 0;
-    transition: opacity 150ms ease;
-    will-change: opacity;
+		z-index: 0;
 
     &:hover {
       color: var(--toggler-dots-color-hovered);
+			background: var(--toggler-dots-color);
     }
 
     svg {
       fill: currentColor;
     }
   }
-}
-
-.tc-wrap:hover .tc-toolbox__toggler {
-  opacity: 1;
 }

@@ -13,10 +13,12 @@
   padding: 6px;
   display: none;
   will-change: opacity, transform;
+	
 
   &--opened {
     display: block;
     animation: menuShowing 100ms cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+		z-index: 100;
   }
 
 
@@ -67,11 +69,6 @@
     &--confirm &-icon {
       background: var(--color-background-confirm);
       border-color: rgba(0,0,0,0.1);
-
-      svg {
-        transition: transform 200ms ease-in;
-        transform: rotate(90deg) scale(1.2);
-      }
     }
 
     &--hidden {

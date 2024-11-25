@@ -25,9 +25,10 @@
   resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.24.8.tgz#58a4dbbcad7eb1d48930524a3fd93d93e9084c6f"
   integrity sha512-WzfbgXOkGzZiXXCqk43kKwZjzwx4oulxZi3nq2TYL9mOjQv6kYwul9mz6ID36njuL7Xkp6nJEfok848Zj10j/w==
 
-"@codexteam/icons@^0.0.6":
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/@codexteam/icons/-/icons-0.0.6.tgz#5553ada48dddf5940851ccc142cfe17835c36ad3"
+"@codexteam/icons@0.3.2":
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/@codexteam/icons/-/icons-0.3.2.tgz#b7aed0ba7b344e07953101f5476cded570d4f150"
+  integrity sha512-P1ep2fHoy0tv4wx85eic+uee5plDnZQ1Qa6gDfv7eHPkCXorMtVqJhzMb75o1izogh6G7380PqmFDXV3bW3Pig==
 
 "@es-joy/jsdoccomment@~0.46.0":
   version "0.46.0"
