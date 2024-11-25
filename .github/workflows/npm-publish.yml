@@ -4,8 +4,9 @@
 name: editorjs-adv-table
 
 on:
-  release:
-    types: [created]
+ push:
+    branches:
+      - master
 
 jobs:
   publish:
