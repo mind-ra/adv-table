@@ -1,9 +1,9 @@
-(function(){var r;"use strict";try{if(typeof document<"u"){var o=document.createElement("style");o.nonce=(r=document.head.querySelector("meta[property=csp-nonce]"))==null?void 0:r.content,o.appendChild(document.createTextNode('.tc-wrap{--color-background:#f9f9fb;--color-background:#e3e3e3;--color-text-secondary:#7b7e89;--color-border:#e8e8eb;--cell-size:34px;--toolbox-icon-size:18px;--toolbox-padding:6px;--toolbox-aiming-field-size:calc(var(--toolbox-icon-size) + var(--toolbox-padding)*2);border-left:0;position:relative;height:100%;width:100%;margin-top:var(--toolbox-icon-size);box-sizing:border-box;display:grid;grid-template-columns:calc(100% - var(--cell-size)) var(--cell-size)}.tc-wrap--readonly{grid-template-columns:100% var(--cell-size)}.tc-wrap svg{vertical-align:top}@media print{.tc-wrap{border-left-color:var(--color-border);border-left-style:solid;border-left-width:1px;grid-template-columns:100% var(--cell-size)}}@media print{.tc-wrap .tc-row:after{display:none}}.tc-table{position:relative;width:100%;height:100%;border-collapse:collapse;font-size:14px;border-top:1px solid var(--color-border);line-height:1.4}.tc-table:after{width:calc(var(--cell-size));height:100%;left:calc(var(--cell-size)*-1);top:0}.tc-table:after,.tc-table:before{position:absolute;content:""}.tc-table:before{width:100%;height:var(--toolbox-aiming-field-size);top:calc(var(--toolbox-aiming-field-size)*-1);left:0}.tc-table--heading .tc-row:first-child{text-align:left;font-weight:600;border-bottom:2px solid var(--color-border)}.tc-table--heading .tc-row:first-child [contenteditable]:empty:before{content:attr(heading);color:var(--color-text-secondary)}.tc-table--heading .tc-row:first-child:after{bottom:-2px;border-bottom:2px solid var(--color-border)}.tc-add-column,.tc-add-row{display:flex;color:var(--color-text-secondary)}@media print{.tc-add{display:none}}.tc-add-column{padding:4px 0;justify-content:center;align-items:center}.tc-add-column--disabled{visibility:hidden}@media print{.tc-add-column{display:none}}.tc-add-row{height:var(--cell-size);justify-content:center;align-items:center;padding-left:4px;position:relative}.tc-add-row--disabled{display:none}@media print{.tc-add-row{display:none}}.tc-add-column,.tc-add-row{transition:0s;cursor:pointer;will-change:background-color}.tc-add-column:hover,.tc-add-row:hover{transition:background-color .1s ease;background-color:var(--color-background)}.tc-add-row{margin-top:1px}.tc-add-row:hover:before{transition:.1s;background-color:var(--color-background)}.tc-row{position:relative;border-bottom:1px solid var(--color-border)}.tc-row--selected{background:var(--color-background)}.tc-row--selected:after{background:var(--color-background)}.tc-cell{border-right:1px solid var(--color-border);border-bottom:1px solid var(--color-border);padding:6px 12px;overflow:hidden;outline:none;line-break:normal}.tc-cell--selected{background:var(--color-background)}.tc-cell[colspan="0"],.tc-cell[rowspan="0"]{display:none}.tc-wrap--readonly .tc-row:after{display:none}.tc-toolbox{--toolbox-padding:6px;--popover-margin:30px;--toggler-click-zone-size:30px;--toggler-dots-color:#7b7e89;--toggler-dots-color-hovered:#1d202b;position:absolute;cursor:pointer;z-index:1;opacity:0;transition:opacity .1s;will-change:left,top,opacity}.tc-toolbox .tc-popover{position:absolute}.tc-toolbox--column{top:calc(var(--toggler-click-zone-size)*-1);transform:translate(calc(var(--toggler-click-zone-size)*-1/2));will-change:left,opacity}.tc-toolbox--column .tc-popover{top:100%;right:0}.tc-toolbox--row{left:calc(var(--popover-margin)*-1);transform:translateY(calc(var(--toggler-click-zone-size)*-1/2));margin-top:-1px;will-change:top,opacity}.tc-toolbox--row .tc-popover{top:0;left:100%}.tc-toolbox--cell{will-change:left,top,opacity}.tc-toolbox--cell .tc-popover{top:0;right:100%}.tc-toolbox--showed{opacity:1}.tc-toolbox__toggler{display:flex;align-items:center;justify-content:center;width:var(--toggler-click-zone-size);height:var(--toggler-click-zone-size);color:var(--toggler-dots-color);z-index:0}.tc-toolbox__toggler:hover{color:var(--toggler-dots-color-hovered);background:var(--toggler-dots-color)}.tc-toolbox__toggler svg{fill:currentColor}.tc-settings .cdx-settings-button{width:50%;margin:0}.tc-popover{--color-border:#eaeaea;--color-background:#fff;--color-background-hover:rgba(232,232,235,.49);--color-background-confirm:#e24a4a;--color-background-confirm-hover:#d54040;--color-text-confirm:#fff;background:var(--color-background);border:1px solid var(--color-border);box-shadow:0 3px 15px -3px #0d142121;border-radius:6px;padding:6px;display:none;will-change:opacity,transform}.tc-popover--opened{display:block;animation:menuShowing .1s cubic-bezier(.215,.61,.355,1) forwards;z-index:100}.tc-popover__item{display:flex;align-items:center;padding:2px 14px 2px 2px;border-radius:5px;cursor:pointer;white-space:nowrap;-webkit-user-select:none;-moz-user-select:none;user-select:none}.tc-popover__item:hover{background:var(--color-background-hover)}.tc-popover__item:not(:last-of-type){margin-bottom:2px}.tc-popover__item-icon{display:inline-flex;width:26px;height:26px;align-items:center;justify-content:center;background:var(--color-background);border-radius:5px;border:1px solid var(--color-border);margin-right:8px}.tc-popover__item-label{line-height:22px;font-size:14px;font-weight:500}.tc-popover__item--confirm{background:var(--color-background-confirm);color:var(--color-text-confirm)}.tc-popover__item--confirm:hover{background-color:var(--color-background-confirm-hover)}.tc-popover__item--confirm .tc-popover__item-icon{background:var(--color-background-confirm);border-color:#0000001a}.tc-popover__item--hidden{display:none}@keyframes menuShowing{0%{opacity:0;transform:translateY(-8px) scale(.9)}70%{opacity:1;transform:translateY(2px)}to{transform:translateY(0)}}')),document.head.appendChild(o)}}catch(e){console.error("vite-plugin-css-injected-by-js",e)}})();
-function d(u, t, e = {}) {
+(function(){var r;"use strict";try{if(typeof document<"u"){var o=document.createElement("style");o.nonce=(r=document.head.querySelector("meta[property=csp-nonce]"))==null?void 0:r.content,o.appendChild(document.createTextNode('.tc-wrap{--color-background:#f9f9fb;--color-background:#e3e3e3;--color-text-secondary:#7b7e89;--color-border:#e8e8eb;--cell-size:34px;--toolbox-icon-size:18px;--toolbox-padding:6px;--toolbox-aiming-field-size:calc(var(--toolbox-icon-size) + var(--toolbox-padding)*2);border-left:0;position:relative;height:100%;width:100%;margin-top:var(--toolbox-icon-size);box-sizing:border-box;display:grid;grid-template-columns:calc(100% - var(--cell-size)) var(--cell-size)}.tc-wrap--readonly{grid-template-columns:100% var(--cell-size)}.tc-wrap svg{vertical-align:top}@media print{.tc-wrap{border-left-color:var(--color-border);border-left-style:solid;border-left-width:1px;grid-template-columns:100% var(--cell-size)}}@media print{.tc-wrap .tc-row:after{display:none}}.tc-table-container{overflow-x:auto}.tc-table,.tc-table-container{width:100%;height:100%}.tc-table{position:relative;border-collapse:collapse;font-size:14px;border-top:1px solid var(--color-border);line-height:1.4}.tc-table:after{position:absolute;content:"";width:calc(var(--cell-size));left:calc(var(--cell-size)*-1);top:0}.tc-table:before{position:absolute;content:"";height:var(--toolbox-aiming-field-size);top:calc(var(--toolbox-aiming-field-size)*-1);left:0}.tc-table--heading .tc-row:first-child{text-align:left;font-weight:600;border-bottom:2px solid var(--color-border)}.tc-table--heading .tc-row:first-child [contenteditable]:empty:before{content:attr(heading);color:var(--color-text-secondary)}.tc-table--heading .tc-row:first-child:after{bottom:-2px;border-bottom:2px solid var(--color-border)}.tc-add-column,.tc-add-row{display:flex;color:var(--color-text-secondary)}@media print{.tc-add{display:none}}.tc-add-column{padding:4px 0;justify-content:center;align-items:center}.tc-add-column--disabled{visibility:hidden}@media print{.tc-add-column{display:none}}.tc-add-row{height:var(--cell-size);justify-content:center;align-items:center;padding-left:4px;position:relative}.tc-add-row--disabled{display:none}@media print{.tc-add-row{display:none}}.tc-add-column,.tc-add-row{transition:0s;cursor:pointer;will-change:background-color}.tc-add-column:hover,.tc-add-row:hover{transition:background-color .1s ease;background-color:var(--color-background)}.tc-add-row{margin-top:1px}.tc-add-row:hover:before{transition:.1s;background-color:var(--color-background)}.tc-row{position:relative;border-bottom:1px solid var(--color-border)}.tc-row--selected{background:var(--color-background)}.tc-row--selected:after{background:var(--color-background)}.tc-cell{border-right:1px solid var(--color-border);border-bottom:1px solid var(--color-border);padding:6px 12px;overflow:hidden;outline:none;line-break:normal}.tc-cell--selected{background:var(--color-background)}.tc-cell[colspan="0"],.tc-cell[rowspan="0"]{display:none}.tc-wrap--readonly .tc-row:after{display:none}.tc-toolbox{--toolbox-padding:6px;--popover-margin:30px;--toggler-click-zone-size:30px;--toggler-dots-color:#7b7e89;--toggler-dots-color-hovered:#1d202b;position:absolute;cursor:pointer;z-index:1;opacity:0;transition:opacity .1s;will-change:left,top,opacity}.tc-toolbox .tc-popover{position:absolute}.tc-toolbox--column{top:calc(var(--toggler-click-zone-size)*-1);transform:translate(calc(var(--toggler-click-zone-size)*-1/2));will-change:left,opacity}.tc-toolbox--column .tc-popover{top:100%;right:0}.tc-toolbox--row{left:calc(var(--popover-margin)*-1);transform:translateY(calc(var(--toggler-click-zone-size)*-1/2));margin-top:-1px;will-change:top,opacity}.tc-toolbox--row .tc-popover{top:0;left:100%}.tc-toolbox--cell{will-change:left,top,opacity}.tc-toolbox--cell .tc-popover{top:0;right:100%}.tc-toolbox--showed{opacity:1}.tc-toolbox__toggler{display:flex;align-items:center;justify-content:center;width:var(--toggler-click-zone-size);height:var(--toggler-click-zone-size);color:var(--toggler-dots-color);z-index:0}.tc-toolbox__toggler:hover{color:var(--toggler-dots-color-hovered);background:var(--toggler-dots-color)}.tc-toolbox__toggler svg{fill:currentColor}.tc-settings .cdx-settings-button{width:50%;margin:0}.tc-popover{--color-border:#eaeaea;--color-background:#fff;--color-background-hover:rgba(232,232,235,.49);--color-background-confirm:#e24a4a;--color-background-confirm-hover:#d54040;--color-text-confirm:#fff;background:var(--color-background);border:1px solid var(--color-border);box-shadow:0 3px 15px -3px #0d142121;border-radius:6px;padding:6px;display:none;will-change:opacity,transform}.tc-popover--opened{display:block;animation:menuShowing .1s cubic-bezier(.215,.61,.355,1) forwards;z-index:100}.tc-popover__item{display:flex;align-items:center;padding:2px 14px 2px 2px;border-radius:5px;cursor:pointer;white-space:nowrap;-webkit-user-select:none;-moz-user-select:none;user-select:none}.tc-popover__item:hover{background:var(--color-background-hover)}.tc-popover__item:not(:last-of-type){margin-bottom:2px}.tc-popover__item-icon{display:inline-flex;width:26px;height:26px;align-items:center;justify-content:center;background:var(--color-background);border-radius:5px;border:1px solid var(--color-border);margin-right:8px}.tc-popover__item-label{line-height:22px;font-size:14px;font-weight:500}.tc-popover__item--confirm{background:var(--color-background-confirm);color:var(--color-text-confirm)}.tc-popover__item--confirm:hover{background-color:var(--color-background-confirm-hover)}.tc-popover__item--confirm .tc-popover__item-icon{background:var(--color-background-confirm);border-color:#0000001a}.tc-popover__item--hidden{display:none}@keyframes menuShowing{0%{opacity:0;transform:translateY(-8px) scale(.9)}70%{opacity:1;transform:translateY(2px)}to{transform:translateY(0)}}')),document.head.appendChild(o)}}catch(e){console.error("vite-plugin-css-injected-by-js",e)}})();
+function a(u, t, e = {}) {
   const o = document.createElement(u);
   Array.isArray(t) ? o.classList.add(...t) : t && o.classList.add(t);
-  for (const s in e)
-    Object.prototype.hasOwnProperty.call(e, s) && (o[s] = e[s]);
+  for (const i in e)
+    Object.prototype.hasOwnProperty.call(e, i) && (o[i] = e[i]);
   return o;
 }
 function b(u) {
@@ -54,13 +54,13 @@ class h {
    * @returns {Element}
    */
   render() {
-    return this.wrapper = d("div", h.CSS.popover), this.items.forEach((t, e) => {
-      const o = d("div", h.CSS.item), s = d("div", h.CSS.itemIcon, {
+    return this.wrapper = a("div", h.CSS.popover), this.items.forEach((t, e) => {
+      const o = a("div", h.CSS.item), i = a("div", h.CSS.itemIcon, {
         innerHTML: t.icon
-      }), i = d("div", h.CSS.itemLabel, {
+      }), s = a("div", h.CSS.itemLabel, {
         textContent: t.label
       });
-      o.dataset.index = e, o.appendChild(s), o.appendChild(i), this.wrapper.appendChild(o), this.itemEls.push(o);
+      o.dataset.index = e, o.appendChild(i), o.appendChild(s), this.wrapper.appendChild(o), this.itemEls.push(o);
     }), this.wrapper.addEventListener("click", (t) => {
       this.popoverClicked(t);
     }), this.wrapper;
@@ -75,12 +75,12 @@ class h {
     const e = t.target.closest(`.${h.CSS.item}`);
     if (!e)
       return;
-    const o = e.dataset.index, s = this.items[o];
-    if (s.confirmationRequired && !this.hasConfirmationState(e)) {
+    const o = e.dataset.index, i = this.items[o];
+    if (i.confirmationRequired && !this.hasConfirmationState(e)) {
       this.setConfirmationState(e);
       return;
     }
-    s.onClick();
+    i.onClick();
   }
   /**
    * Enable the confirmation state on passed item
@@ -147,8 +147,8 @@ class p {
    * @param {function} config.onClose - callback fired when the Popover is closing
    * @param {string} config.cssModifier - the modifier for the Toolbox. Allows to add some specific styles.
    */
-  constructor({ api: t, items: e, onOpen: o, onClose: s, cssModifier: i = "" }) {
-    this.api = t, this.items = e, this.onOpen = o, this.onClose = s, this.cssModifier = i, this.popover = null, this.wrapper = this.createToolbox();
+  constructor({ api: t, items: e, onOpen: o, onClose: i, cssModifier: s = "" }) {
+    this.api = t, this.items = e, this.onOpen = o, this.onClose = i, this.cssModifier = s, this.popover = null, this.wrapper = this.createToolbox();
   }
   /**
    * Style classes
@@ -172,7 +172,7 @@ class p {
    * @returns {Element}
    */
   createToolbox() {
-    const t = d("div", [
+    const t = a("div", [
       p.CSS.toolbox,
       this.cssModifier ? `${p.CSS.toolbox}--${this.cssModifier}` : ""
     ]);
@@ -186,7 +186,7 @@ class p {
    * @returns {Element}
    */
   createToggler() {
-    const t = d("div", p.CSS.toggler, {
+    const t = a("div", p.CSS.toggler, {
       innerHTML: I
     });
     return t.addEventListener("click", () => {
@@ -219,8 +219,8 @@ class p {
    */
   show(t) {
     const e = t();
-    Object.entries(e).forEach(([o, s]) => {
-      this.wrapper.style[o] = s;
+    Object.entries(e).forEach(([o, i]) => {
+      this.wrapper.style[o] = i;
     }), this.wrapper.classList.add(p.CSS.toolboxShowed);
   }
   /**
@@ -232,9 +232,10 @@ class p {
     this.popover.close(), this.wrapper.classList.remove(p.CSS.toolboxShowed);
   }
 }
-const n = {
+const r = {
   wrapper: "tc-wrap",
   wrapperReadOnly: "tc-wrap--readonly",
+  tableContainer: "tc-table-container",
   table: "tc-table",
   row: "tc-row",
   withHeadings: "tc-table--heading",
@@ -256,14 +257,14 @@ class j {
    * @param {TableData} data - Editor.js API
    * @param {TableConfig} config - Editor.js API
    */
-  constructor(t, e, o, s) {
-    this.readOnly = t, this.api = e, this.data = o, this.config = s, this.wrapper = null, this.table = null, this.toolboxRow = this.createRowToolbox(), this.toolboxColumn = this.createColumnToolbox(), this.toolboxCell = null, this.focusedCell = null, this.validateData();
-    const { rows: i, cols: a } = this.computeSize();
-    this.rows = i, this.cols = a, this.focusedRow = -1, this.focusedCol = -1, this.createTableWrapper(), this.tunes = {
+  constructor(t, e, o, i) {
+    this.readOnly = t, this.api = e, this.data = o, this.config = i, this.wrapper = null, this.tableContainer = null, this.table = null, this.toolboxRow = this.createRowToolbox(), this.toolboxColumn = this.createColumnToolbox(), this.toolboxCell = null, this.focusedCell = null, this.validateData();
+    const { rows: s, cols: d } = this.computeSize();
+    this.rows = s, this.cols = d, this.focusedRow = -1, this.focusedCol = -1, this.createTableWrapper(), this.tunes = {
       withHeadings: o.withHeadings
-    }, this.render(), this.documentClicked = (r) => {
-      r.target.closest(`.${n.table}`), r.target.closest(`.${n.wrapper}`);
-      const l = r.target.closest(`.${n.addRow}`), c = r.target.closest(`.${n.addColumn}`);
+    }, this.render(), this.documentClicked = (n) => {
+      n.target.closest(`.${r.table}`), n.target.closest(`.${r.wrapper}`);
+      const l = n.target.closest(`.${r.addRow}`), c = n.target.closest(`.${r.addColumn}`);
       l && l.parentNode === this.wrapper ? (this.addRow(void 0, !0), this.closeCellToolbox()) : c && c.parentNode === this.wrapper && (this.addColumn(void 0, !0), this.closeCellToolbox());
     }, this.readOnly || this.bindEvents();
   }
@@ -273,7 +274,7 @@ class j {
    */
   validateData() {
     if (Array.isArray(this.data.content) ? this.data.content.length === 0 : !1) {
-      const o = Number.parseInt(this.config && this.config.rows), s = Number.parseInt(this.config && this.config.cols), i = !isNaN(o) && o > 0 ? o : void 0, a = !isNaN(s) && s > 0 ? s : void 0, r = 2, l = 2, c = i || r, f = a || l;
+      const o = Number.parseInt(this.config && this.config.rows), i = Number.parseInt(this.config && this.config.cols), s = !isNaN(o) && o > 0 ? o : void 0, d = !isNaN(i) && i > 0 ? i : void 0, n = 2, l = 2, c = s || n, f = d || l;
       for (let w = 0; w < c; w++) {
         let g = [];
         for (let C = 0; C < f; C++)
@@ -289,16 +290,16 @@ class j {
    */
   computeSize() {
     const t = this.data && this.data.content, o = Array.isArray(t) ? t.length : void 0;
-    let s = 0;
-    for (let r = 0; r < t.length; r++) {
+    let i = 0;
+    for (let n = 0; n < t.length; n++) {
       let l = 0;
-      for (let c = 0; c < t[r].length; c++)
+      for (let c = 0; c < t[n].length; c++)
         l++;
-      s = Math.max(s, l);
+      i = Math.max(i, l);
     }
     return {
       rows: o,
-      cols: s
+      cols: i
     };
   }
   /**
@@ -311,12 +312,12 @@ class j {
     if (t && t.content) {
       this.emptyTable();
       for (let e = 0; e < t.content.length; e++) {
-        let o = d("tr", n.row);
-        for (let s = 0; s < t.content[e].length; s++) {
-          let i = t.content[e][s], r = d("td", n.cell, {
+        let o = a("tr", r.row);
+        for (let i = 0; i < t.content[e].length; i++) {
+          let s = t.content[e][i], n = a("td", r.cell, {
             contentEditable: !this.readOnly
           });
-          typeof i == "object" ? (r.innerHTML = i.content, i.hasOwnProperty("colspan") && r.setAttribute("colspan", i.colspan), i.hasOwnProperty("rowspan") && r.setAttribute("rowspan", i.rowspan)) : r.innerHTML = i, o.appendChild(r);
+          typeof s == "object" ? (n.innerHTML = s.content, s.hasOwnProperty("colspan") && n.setAttribute("colspan", s.colspan), s.hasOwnProperty("rowspan") && n.setAttribute("rowspan", s.rowspan)) : n.innerHTML = s, o.appendChild(n);
         }
         this.table.appendChild(o);
       }
@@ -373,13 +374,13 @@ class j {
   }
   saveData() {
     const t = [];
-    return this.table.querySelectorAll(`.${n.row}`).forEach((o) => {
-      const s = Array.from(o.querySelectorAll(`.${n.cell}`));
-      t.push(s.map((i) => {
-        let a = { content: i.innerHTML }, r = i.getAttribute("colspan");
-        r && (a.colspan = r);
-        let l = i.getAttribute("rowspan");
-        return l && (a.rowspan = l), !r && !l ? i.innerHTML : a;
+    return this.table.querySelectorAll(`.${r.row}`).forEach((o) => {
+      const i = Array.from(o.querySelectorAll(`.${r.cell}`));
+      t.push(i.map((s) => {
+        let d = { content: s.innerHTML }, n = s.getAttribute("colspan");
+        n && (d.colspan = n);
+        let l = s.getAttribute("rowspan");
+        return l && (d.rowspan = l), !n && !l ? s.innerHTML : d;
       }));
     }), this.data.content = t, t;
   }
@@ -390,10 +391,10 @@ class j {
    * @returns {HTMLElement} wrapper - where all buttons for a table and the table itself will be
    */
   createTableWrapper() {
-    if (this.wrapper = d("div", n.wrapper), this.table = d("table", n.table), this.readOnly && this.wrapper.classList.add(n.wrapperReadOnly), this.wrapper.appendChild(this.toolboxColumn.element), this.wrapper.appendChild(this.toolboxRow.element), this.wrapper.appendChild(this.table), !this.readOnly) {
-      const t = d("div", n.addColumn, {
+    if (this.wrapper = a("div", r.wrapper), this.tableContainer = a("div", r.tableContainer), this.table = a("table", r.table), this.readOnly && this.wrapper.classList.add(r.wrapperReadOnly), this.wrapper.appendChild(this.toolboxColumn.element), this.wrapper.appendChild(this.toolboxRow.element), this.tableContainer.appendChild(this.table), this.wrapper.appendChild(this.tableContainer), !this.readOnly) {
+      const t = a("div", r.addColumn, {
         innerHTML: x
-      }), e = d("div", n.addRow, {
+      }), e = a("div", r.addRow, {
         innerHTML: x
       });
       this.wrapper.appendChild(t), this.wrapper.appendChild(e);
@@ -518,13 +519,13 @@ class j {
             let t = this.data.withHeadings ? this.rows - 1 : this.rows, e = this.getIntAttribute(this.focusedCell, "rowspan");
             if (e === t)
               return !0;
-            let o = this.focusedCell.parentElement, s = o;
+            let o = this.focusedCell.parentElement, i = o;
             for (e = 1; e !== 0; ) {
-              e--, s = s.previousElementSibling;
-              let i = this.getIntAttribute(s, "rowspan");
-              e += i - 1;
+              e--, i = i.previousElementSibling;
+              let s = this.getIntAttribute(i, "rowspan");
+              e += s - 1;
             }
-            return o.children.length !== s.children.length;
+            return o.children.length !== i.children.length;
           },
           onClick: () => {
             this.mergeUp(), this.closeCellToolbox();
@@ -553,13 +554,13 @@ class j {
             let t = this.data.withHeadings ? this.rows - 1 : this.rows, e = this.getIntAttribute(this.focusedCell, "rowspan");
             if (e === t)
               return !0;
-            let o = this.focusedCell.parentElement, s = o;
+            let o = this.focusedCell.parentElement, i = o;
             for (; e !== 0; ) {
-              e--, s = s.nextElementSibling;
-              let i = this.getIntAttribute(s, "rowspan");
-              e += i - 1;
+              e--, i = i.nextElementSibling;
+              let s = this.getIntAttribute(i, "rowspan");
+              e += s - 1;
             }
-            return o.children.length !== s.children.length;
+            return o.children.length !== i.children.length;
           },
           onClick: () => {
             this.mergeDown(), this.closeCellToolbox();
@@ -591,11 +592,11 @@ class j {
    * Merge Up
    */
   mergeUp() {
-    let e = this.table.querySelector(`.${n.row}:nth-child(${this.focusedRow})`).querySelector(`.${n.cell}:nth-child(${this.focusedCol + 1})`);
+    let e = this.table.querySelector(`.${r.row}:nth-child(${this.focusedRow})`).querySelector(`.${r.cell}:nth-child(${this.focusedCol + 1})`);
     if (e == null)
       return;
-    let o = this.getIntAttribute(this.focusedCell, "rowspan"), s = this.getIntAttribute(e, "rowspan");
-    e.setAttribute("rowspan", o + s), e.innerHTML = `${e.innerHTML} ${this.focusedCell.innerHTML}`.trim(), this.focusedCell.remove(), this.saveData(), this.render();
+    let o = this.getIntAttribute(this.focusedCell, "rowspan"), i = this.getIntAttribute(e, "rowspan");
+    e.setAttribute("rowspan", o + i), e.innerHTML = `${e.innerHTML} ${this.focusedCell.innerHTML}`.trim(), this.focusedCell.remove(), this.saveData(), this.render();
   }
   /**
    * Merge Right
@@ -611,11 +612,11 @@ class j {
    * Merge Down
    */
   mergeDown() {
-    let t = this.getIntAttribute(this.focusedCell, "rowspan"), e = this.focusedRow + 1 + t, s = this.table.querySelector(`.${n.row}:nth-child(${e})`).querySelector(`.${n.cell}:nth-child(${this.focusedCol + 1})`);
-    if (this.getIntAttribute(this.focusedCell, "rowspan"), s == null)
+    let t = this.getIntAttribute(this.focusedCell, "rowspan"), e = this.focusedRow + 1 + t, i = this.table.querySelector(`.${r.row}:nth-child(${e})`).querySelector(`.${r.cell}:nth-child(${this.focusedCol + 1})`);
+    if (this.getIntAttribute(this.focusedCell, "rowspan"), i == null)
       return;
-    let i = this.getIntAttribute(this.focusedCell, "rowspan"), a = this.getIntAttribute(s, "rowspan");
-    this.focusedCell.setAttribute("rowspan", i + a), this.focusedCell.innerHTML = `${this.focusedCell.innerHTML} ${s.innerHTML}`.trim(), s.remove(), this.saveData(), this.render();
+    let s = this.getIntAttribute(this.focusedCell, "rowspan"), d = this.getIntAttribute(i, "rowspan");
+    this.focusedCell.setAttribute("rowspan", s + d), this.focusedCell.innerHTML = `${this.focusedCell.innerHTML} ${i.innerHTML}`.trim(), i.remove(), this.saveData(), this.render();
   }
   /**
    * Merge Left
@@ -629,10 +630,10 @@ class j {
    */
   generateAndPlaceCellToolbox() {
     this.toolboxCell = this.createCellToolbox(), this.table.appendChild(this.toolboxCell.element);
-    const { fromTopBorder: t, fromLeftBorder: e } = m(this.table, this.focusedCell), o = this.focusedCell.getBoundingClientRect(), s = this.toolboxCell.element.getBoundingClientRect();
+    const { fromTopBorder: t, fromLeftBorder: e } = m(this.table, this.focusedCell), o = this.focusedCell.getBoundingClientRect(), i = this.toolboxCell.element.getBoundingClientRect();
     this.toolboxCell.show(() => ({
       top: `${t}px`,
-      left: `${e + o.width - s.width}px`
+      left: `${e + o.width - i.width}px`
     }));
   }
   /**
@@ -645,7 +646,7 @@ class j {
   }
   focusInTableListener(t) {
     var e;
-    (e = this.focusedCell) == null || e.classList.remove(`${n.cellSelected}`), this.closeCellToolbox(), this.toolboxRow.hide(), this.toolboxColumn.hide(), this.focusedCell = t.target, this.focusedCell.classList.add(`${n.cellSelected}`), this.focusedRow = this.focusedCell.parentElement.rowIndex, this.focusedCol = this.focusedCell.cellIndex, this.generateAndPlaceCellToolbox(), this.updateToolboxesPosition();
+    (e = this.focusedCell) == null || e.classList.remove(`${r.cellSelected}`), this.closeCellToolbox(), this.toolboxRow.hide(), this.toolboxColumn.hide(), this.focusedCell = t.target, this.focusedCell.classList.add(`${r.cellSelected}`), this.focusedRow = this.focusedCell.parentElement.rowIndex, this.focusedCol = this.focusedCell.cellIndex, this.generateAndPlaceCellToolbox(), this.updateToolboxesPosition();
   }
   /**
   * Update toolboxes position
@@ -693,7 +694,7 @@ class j {
    * @param {boolean} withHeadings - use headings row or not
    */
   setHeadingsSetting(t) {
-    this.tunes.withHeadings = t, t ? this.table.classList.add(n.withHeadings) : this.table.classList.remove(n.withHeadings);
+    this.tunes.withHeadings = t, t ? this.table.classList.add(r.withHeadings) : this.table.classList.remove(r.withHeadings);
   }
   /**
    * return data.content
@@ -737,12 +738,12 @@ class D {
    *
    * @param {TableConstructor} init
    */
-  constructor({ data: t, config: e, api: o, readOnly: s, block: i }) {
-    this.api = o, this.readOnly = s, this.config = e, this.data = {
+  constructor({ data: t, config: e, api: o, readOnly: i, block: s }) {
+    this.api = o, this.readOnly = i, this.config = e, this.data = {
       withHeadings: this.getConfig("withHeadings", !1, t),
       stretched: this.getConfig("stretched", !1, t),
       content: t && t.content ? t.content : []
-    }, this.table = null, this.block = i;
+    }, this.table = null, this.block = s;
   }
   /**
    * Get Tool toolbox settings
@@ -763,7 +764,7 @@ class D {
    * @returns {HTMLDivElement}
    */
   render() {
-    return this.table = new j(this.readOnly, this.api, this.data, this.config), this.container = d("div", this.api.styles.block), this.container.appendChild(this.table.getWrapper()), this.table.setHeadingsSetting(this.data.withHeadings), this.container;
+    return this.table = new j(this.readOnly, this.api, this.data, this.config), this.container = a("div", this.api.styles.block), this.container.appendChild(this.table.getWrapper()), this.table.setHeadingsSetting(this.data.withHeadings), this.container;
   }
   /**
    * Returns plugin settings
@@ -833,8 +834,8 @@ class D {
    * @returns {any} - config value.
    */
   getConfig(t, e = void 0, o = void 0) {
-    const s = this.data || o;
-    return s ? s[t] ? s[t] : e : this.config && this.config[t] ? this.config[t] : e;
+    const i = this.data || o;
+    return i ? i[t] ? i[t] : e : this.config && this.config[t] ? this.config[t] : e;
   }
   /**
    * Table onPaste configuration
@@ -857,7 +858,7 @@ class D {
    * @param {PasteEvent} event - event with pasted data
    */
   onPaste(t) {
-    const e = t.detail.data, o = e.querySelector(":scope > thead, tr:first-of-type th"), i = Array.from(e.querySelectorAll("tr")).map((a) => Array.from(a.querySelectorAll("th, td")).map((l) => {
+    const e = t.detail.data, o = e.querySelector(":scope > thead, tr:first-of-type th"), s = Array.from(e.querySelectorAll("tr")).map((d) => Array.from(d.querySelectorAll("th, td")).map((l) => {
       let c = { content: l.innerHTML }, f = l.getAttribute("colspan");
       f && (c.colspan = f);
       let w = l.getAttribute("rowspan");
@@ -865,7 +866,7 @@ class D {
     }));
     this.data = {
       withHeadings: o !== null,
-      content: i
+      content: s
     }, this.table.wrapper && this.table.wrapper.replaceWith(this.render());
   }
 }

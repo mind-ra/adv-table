@@ -18,6 +18,7 @@ import {
 const CSS = {
 	wrapper: 'tc-wrap',
 	wrapperReadOnly: 'tc-wrap--readonly',
+	tableContainer: 'tc-table-container',
 	table: 'tc-table',
 	row: 'tc-row',
 	withHeadings: 'tc-table--heading',
@@ -73,6 +74,7 @@ export default class Table {
 		 * DOM nodes
 		 */
 		this.wrapper = null;
+		this.tableContainer = null;
 		this.table = null;
 
 		/**
@@ -355,7 +357,9 @@ export default class Table {
 	 */
 	createTableWrapper() {
 		this.wrapper = $.make('div', CSS.wrapper);
+		this.tableContainer = $.make('div', CSS.tableContainer);
 		this.table = $.make('table', CSS.table);
+		
 
 		if (this.readOnly) {
 			this.wrapper.classList.add(CSS.wrapperReadOnly);
@@ -363,7 +367,8 @@ export default class Table {
 
 		this.wrapper.appendChild(this.toolboxColumn.element);
 		this.wrapper.appendChild(this.toolboxRow.element);
-		this.wrapper.appendChild(this.table);
+		this.tableContainer.appendChild(this.table);
+		this.wrapper.appendChild(this.tableContainer);
 
 		if (!this.readOnly) {
 			const addColumnButton = $.make('div', CSS.addColumn, {

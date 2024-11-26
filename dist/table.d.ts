@@ -39,6 +39,7 @@ export default class Table {
      * DOM nodes
      */
     wrapper: Element;
+    tableContainer: Element;
     table: Element;
     /**
      * Toolboxes
