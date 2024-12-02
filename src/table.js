@@ -465,7 +465,7 @@ export default class Table {
 			],
 			onOpen: () => {
 				this.toolboxRow.popover.close();
-				this.toolboxCell.popover.close();
+				this.toolboxCell?.popover.close();
 			},
 			onClose: () => {
 			}
@@ -525,7 +525,7 @@ export default class Table {
 			],
 			onOpen: () => {
 				this.toolboxColumn.popover.close();
-				this.toolboxCell.popover.close();
+				this.toolboxCell?.popover.close();
 			},
 			onClose: () => {
 			}

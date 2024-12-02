@@ -451,7 +451,8 @@ class j {
         }
       ],
       onOpen: () => {
-        this.toolboxRow.popover.close(), this.toolboxCell.popover.close();
+        var t;
+        this.toolboxRow.popover.close(), (t = this.toolboxCell) == null || t.popover.close();
       },
       onClose: () => {
       }
@@ -494,7 +495,8 @@ class j {
         }
       ],
       onOpen: () => {
-        this.toolboxColumn.popover.close(), this.toolboxCell.popover.close();
+        var t;
+        this.toolboxColumn.popover.close(), (t = this.toolboxCell) == null || t.popover.close();
       },
       onClose: () => {
       }
