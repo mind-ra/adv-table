@@ -714,6 +714,12 @@ class j {
   getIntAttribute(t, e, o = 1) {
     return Number(t.getAttribute(e) ?? o);
   }
+  /**
+   * Remove listeners on the document
+   */
+  destroy() {
+    document.removeEventListener("click", this.documentClicked);
+  }
 }
 class D {
   /**

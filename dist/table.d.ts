@@ -213,6 +213,10 @@ export default class Table {
      * @param {number} defaultValue
      */
     getIntAttribute(element: HTMLElement, attributeName: string, defaultValue?: number): number;
+    /**
+  * Remove listeners on the document
+  */
+    destroy(): void;
 }
 export type TableConfig = object;
 export type TableCell = object;

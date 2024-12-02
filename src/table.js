@@ -882,4 +882,11 @@ export default class Table {
 	getIntAttribute(element, attributeName, defaultValue = 1) {
 		return Number(element.getAttribute(attributeName) ?? defaultValue);
 	}
+
+	 /**
+   * Remove listeners on the document
+   */
+	destroy() {
+    document.removeEventListener('click', this.documentClicked);
+  }
 }
